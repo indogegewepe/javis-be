@@ -35,10 +35,9 @@ src/
 ├── routes/        → Routing endpoint API
 ├── middlewares/   → Auth, rate limit, dll
 ├── validators/    → Validasi input (Zod)
-├── config/        → Config database & environment
 ├── utils/         → Helper (JWT, bcrypt, dll)
 ├── seeders/       → Script untuk seed data awal
-└── config/        → Koneksi MySQL
+└── config/        → Config database & environment
 ```
 
 ## Security Features
