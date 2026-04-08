@@ -6,7 +6,7 @@ import { authMiddleware } from "../middlewares/auth.middleware";
 
 const authRouter = Router();
 
-authRouter.post("/api/auth/login", loginController);
+authRouter.post("/api/auth/login", loginRateLimiter, loginController);
 authRouter.post("/api/auth/logout", logoutController);
 authRouter.get("/api/auth/me", authMiddleware, userController);
 
