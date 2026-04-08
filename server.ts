@@ -1,7 +1,12 @@
-import app from "./src/app";
+import express from "express";
+import serverless from "serverless-http";
 
-const PORT = Number(process.env.PORT) || 8080;
+const app = express();
 
-app.listen(PORT, () => {
-	console.log(`Server running on http://localhost:${PORT}`);
+app.use(express.json());
+
+app.get("/api/test", (req, res) => {
+  res.json({ message: "OK" });
 });
+
+export default serverless(app);
