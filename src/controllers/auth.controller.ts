@@ -4,6 +4,7 @@ import type { LoginInput } from "../types/auth";
 import { loginSchema } from "../validators/auth.validator";
 import { loginUser } from "../services/auth.service";
 import { signAccessToken } from "../utils/jwt";
+import { loginRateLimiter } from "../middlewares/rateLimit.middleware";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -13,8 +14,30 @@ export async function loginController(req: Request, res: Response): Promise<void
 		const user = await loginUser(payload);
 
 		if (!user) {
-			res.status(401).json({ message: "Email/Username atau password salah" });
+			const rateLimitInfo = req as Request & {
+				rateLimit?: {
+					remaining: number;
+					limit: number;
+					resetTime?: Date;
+				};
+			};
+
+			const attemptsRemaining = Math.max(rateLimitInfo.rateLimit?.remaining ?? 0, 0);
+			const resetTime =
+				rateLimitInfo.rateLimit?.resetTime instanceof Date
+					? Math.max(Math.ceil((rateLimitInfo.rateLimit.resetTime.getTime() - Date.now()) / 1000), 0)
+					: 0;
+
+			res.status(401).json({
+				message: "Email/Username atau password salah",
+				attemptsRemaining,
+				resetTime,
+			});
 			return;
+		}
+
+		if (req.ip) {
+			loginRateLimiter.resetKey(req.ip);
 		}
 
     const token = signAccessToken({
