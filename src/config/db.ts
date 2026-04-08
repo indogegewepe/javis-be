@@ -17,6 +17,4 @@ export async function checkDbConnection(): Promise<void> {
   console.log("Database connected");
 }
 
-checkDbConnection();
-
 export default pool;
