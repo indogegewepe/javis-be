@@ -7,6 +7,8 @@ import { signAccessToken } from "../utils/jwt";
 import { loginRateLimiter } from "../middlewares/rateLimit.middleware";
 
 const isProduction = process.env.NODE_ENV === "production";
+const shouldSetCookie = process.env.AUTH_SET_COOKIE !== "false";
+const cookieSameSite: "none" | "lax" = isProduction ? "none" : "lax";
 
 export async function loginController(req: Request, res: Response): Promise<void> {
 	try {
@@ -40,23 +42,29 @@ export async function loginController(req: Request, res: Response): Promise<void
 			loginRateLimiter.resetKey(req.ip);
 		}
 
-    const token = signAccessToken({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-    });
 
-    res.cookie("access_token", token, {
-      httpOnly: true,
-			secure: isProduction,
-			sameSite: "none",
-      maxAge: 24 * 60 * 60 * 1000,
-      path: "/",
-    });
+		const token = signAccessToken({
+			id: user.id,
+			username: user.username,
+			email: user.email,
+		});
+
+		if (shouldSetCookie) {
+			res.cookie("access_token", token, {
+				httpOnly: true,
+				secure: isProduction,
+				sameSite: cookieSameSite,
+				maxAge: 24 * 60 * 60 * 1000,
+				path: "/",
+			});
+		}
 
 		res.status(200).json({
 			message: "Login berhasil",
 			user,
+			access_token: token,
+			token_type: "Bearer",
+			expires_in: 24 * 60 * 60,
 		});
 	} catch (error) {
 		if (error instanceof ZodError) {
@@ -71,7 +79,7 @@ export function logoutController(_req: Request, res: Response) {
   res.clearCookie("access_token", {
 		httpOnly: true,
 		secure: isProduction,
-		sameSite:"none",
+		sameSite: cookieSameSite,
 		path: "/",
   });
   res.status(200).json({ message: "Logout berhasil" });
