@@ -1,24 +1,22 @@
 import bcrypt from "bcrypt";
-import type { RowDataPacket } from "mysql2";
-import pool from "../config/db";
+import supabase from "../config/db";
 import type { AuthUser, AuthUserRow, LoginInput } from "../types/auth";
-
-type LoginUserRow = RowDataPacket & AuthUserRow;
 
 export async function loginUser(payload: LoginInput): Promise<AuthUser | null> {
 	const identifier = payload.identifier.trim();
 
-	const [rows] = await pool.query<LoginUserRow[]>(
-		`
-			SELECT id, email, username, password
-			FROM users
-			WHERE BINARY email = ? OR BINARY username = ?
-			LIMIT 1
-		`,
-		[identifier, identifier]
-	);
+	const { data: rows, error } = await supabase
+		.from("users")
+		.select("id, email, username, password")
+		.or(`email.eq.${identifier},username.eq.${identifier}`)
+		.limit(1);
 
-	const user = rows[0];
+	if (error) {
+		console.error("Database query error:", error);
+		return null;
+	}
+
+	const user = rows?.[0] as AuthUserRow | undefined;
 	if (!user) {
 		return null;
 	}

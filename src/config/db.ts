@@ -1,20 +1,32 @@
-import mysql from "mysql2/promise";
+import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const pool = mysql.createPool({
-	host: process.env.DB_HOST || "localhost",
-	port: Number(process.env.DB_PORT) || 3306,
-	user: process.env.DB_USER || "root",
-	password: process.env.DB_PASSWORD || "",
-	database: process.env.DB_NAME || "javis"
-});
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_ANON_KEY || "";
 
-export async function checkDbConnection(): Promise<void> {
-	const connection = await pool.getConnection();
-	connection.release();
-  console.log("Database connected");
+if (!supabaseUrl || !supabaseKey) {
+	console.warn("Warning: SUPABASE_URL or SUPABASE_ANON_KEY is not set");
 }
 
-export default pool;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+export async function checkDbConnection(): Promise<void> {
+	try {
+		const { data, error } = await supabase
+			.from("users")
+			.select("id")
+			.limit(1);
+
+		if (error) {
+			throw error;
+		}
+
+		console.log("Supabase connected");
+	} catch (error) {
+		console.error("Supabase connection failed:", error);
+	}
+}
+
+export default supabase;
