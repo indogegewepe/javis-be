@@ -1,6 +1,6 @@
 ## Project Overview
 
-Backend API ini dibangun menggunakan **Express.js dengan TypeScript** dan menggunakan **MySQL** sebagai database.
+Backend API ini dibangun menggunakan **Express.js dengan TypeScript** dan menggunakan **PostgreSQL** sebagai database.
 Sistem ini menyediakan fitur autentikasi berbasis JWT, keamanan menggunakan rate limiting, serta validasi data menggunakan Zod.
 
 ---
@@ -10,7 +10,7 @@ Sistem ini menyediakan fitur autentikasi berbasis JWT, keamanan menggunakan rate
 * **Runtime**: Node.js
 * **Framework**: Express.js
 * **Language**: TypeScript
-* **Database**: MySQL
+* **Database**: PostgreSQL/Supabase
 * **Authentication**: JWT
 * **Security**:
 
