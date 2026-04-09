@@ -49,7 +49,7 @@ export async function loginController(req: Request, res: Response): Promise<void
     res.cookie("access_token", token, {
       httpOnly: true,
 			secure: isProduction,
-			sameSite: isProduction ? "none" : "lax",
+			sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000,
       path: "/",
     });
@@ -71,7 +71,7 @@ export function logoutController(_req: Request, res: Response) {
   res.clearCookie("access_token", {
 		httpOnly: true,
 		secure: isProduction,
-		sameSite: isProduction ? "none" : "lax",
+		sameSite:"none",
 		path: "/",
   });
   res.status(200).json({ message: "Logout berhasil" });
